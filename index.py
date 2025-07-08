@@ -41,6 +41,7 @@ def home():
                     file_path = "./models/mean_std2.csv"
                     dft = pd.read_csv(file_path)
                     #print(dft["variable"])
+                    file_paths = []
                     with(ro.default_converter + pandas2ri.converter).context():
                         dftc = ro.conversion.get_conversion().py2rpy(dft)
                         ro.r.assign('test_data',dftc)
@@ -51,18 +52,24 @@ def home():
                     #r('print(dfr)') 
                     prediccionesx=0
                     if n== 16:
-                        modelo_gb_bmi()
+                        download_path =modelo_gb_bmi()
                         prediccionesx+=1
+                        file_paths.append(download_path)
                         # r('print("pasoooooooooo")')
-                        download_path = modelo_rf_bmi()                     
+                        download_path2 = modelo_rf_bmi() 
+                        file_paths.append(download_path2)           
                         prediccionesx+=1
+
+                        return jsonify({'message': 'Predicciones realizadas exitosamente',
+                                        'file_paths': file_paths
+                                        })
                     else:
                         #modelo_gb_bmi()
                         #modelo_rf_bmi()
                         download_path = model_gb_ewl()
                         prediccionesx=1  
-
-                    return jsonify({'message': 'Predicciones realizadas exitosamente', 'file_path': download_path})
+                        file_paths.append(download_path)
+                        return jsonify({'message': 'Predicciones realizadas exitosamente', 'file_paths': file_paths})
                 else:
                     return f"Faltan las siguientes columnas: {', '.join(columnas_faltantes)}"
         except Exception as e:

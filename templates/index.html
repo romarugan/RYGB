@@ -430,9 +430,11 @@
                     .then(data => {
                         document.getElementById("charged").innerText = data.message;
 
-                        if (data.file_path) {
-                            // Redirige para iniciar la descarga
-                            window.location.href = `http://127.0.0.1:5002/download?path=${encodeURIComponent(data.file_path)}`;
+                        if (data.file_paths && Array.isArray(data.file_paths)) {
+                            // Redirige para iniciar la descarga de cada archivo
+                            data.file_paths.forEach(filePath => {
+                                window.open(`http://127.0.0.1:5002/download?path=${encodeURIComponent(filePath)}`);
+                            });
                         }
                     })
                     .catch(error => {
