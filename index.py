@@ -1,4 +1,5 @@
 import os
+import time
 os.environ['R_HOME'] = r'C:\Program Files\R\R-4.4.3'
 import pandas as pd
 import secrets
@@ -7,7 +8,7 @@ from rpy2.robjects import pandas2ri
 from rpy2.robjects.packages import importr
 from rpy2.robjects.conversion import localconverter
 from rpy2.robjects import default_converter
-from flask import Flask, render_template, request, send_from_directory,send_file, abort,jsonify
+from flask import Flask, render_template, request, send_from_directory, send_file, abort,jsonify, after_this_request
 from flask_bootstrap import Bootstrap5
 from werkzeug.utils import secure_filename
 
@@ -87,6 +88,17 @@ def download_filep():
     download_path = request.args.get('path')
     print("ultimo",download_path)
     try:
+        # @after_this_request
+        # def remove_file(response):
+        #     time.sleep(5)
+        #     try:
+        #         print("Esperando antes de eliminar el archivo...")
+        #         os.remove(download_path)
+        #         print(f"Archivo eliminado: {download_path}")
+        #     except Exception as remove_error:
+        #         print(f"Error al eliminar el archivo: {remove_error}")
+        #     return response
+        
         print("El archivo a descargar es:", download_path)
         return send_file(download_path, as_attachment=True)
     except Exception as e:
@@ -133,6 +145,7 @@ def submit():
     # ✅ Convertimos a DataFrame
     df = pd.DataFrame([data])  # Un solo registro
     try :
+        file_paths = []
         file_path = "./models/mean_std2.csv"
         dft = pd.read_csv(file_path)
         #print(dft["variable"])
@@ -142,12 +155,16 @@ def submit():
         with(ro.default_converter + pandas2ri.converter).context():
                             dfr = ro.conversion.get_conversion().py2rpy(df)
                             ro.assign('dfr',dfr)
-                            modelo_gb_bmi()
+                            download_path =modelo_gb_bmi()
+                            file_paths.append(download_path)
                             prediccionesx=1
                             # r('print("pasoooooooooo")')
-                            modelo_rf_bmi()
+                            download_path2 = modelo_rf_bmi() 
+                            file_paths.append(download_path2)
                             prediccionesx+=1
-                            return f"Predicciones realizadas exitosamente: {prediccionesx}"
+                            return jsonify({'message': 'Predicciones realizadas exitosamente',
+                                        'file_paths': file_paths
+                                        })
     except Exception as e:
             return f"Ocurrió un error al procesar el archivo: {str(e)}"  
     return render_template('index.html')
@@ -214,7 +231,8 @@ def modelo_gb_bmi():
         print(dfcp)
       
         fecha_actual <- format(Sys.time(), format = "%Y-%m-%d_%H-%M-%S")
-        ruta_base <- "/app/RGBY/temp/"
+        # ruta_base <- "/app/RGBY/temp/"
+        ruta_base <- "./temp/"
         nombre_base <- "gb_bmi_toppred_predict"
         extension <- ".csv"
 
@@ -285,7 +303,8 @@ def modelo_rf_bmi():
         print(dfcp)
         
         fecha_actual <- format(Sys.time(), format = "%Y-%m-%d_%H-%M-%S")
-        ruta_base <- "/app/RGBY/temp/"
+        # ruta_base <- "/app/RGBY/temp/"
+        ruta_base <- "./temp/"
         nombre_base <- "rf_bmi_toppred_predic"
         extension <- ".csv"
 
