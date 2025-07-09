@@ -87,23 +87,27 @@ def download_filep():
     print("paso por aca ")
     download_path = request.args.get('path')
     print("ultimo",download_path)
-    try:
-        # @after_this_request
-        # def remove_file(response):
-        #     time.sleep(5)
-        #     try:
-        #         print("Esperando antes de eliminar el archivo...")
-        #         os.remove(download_path)
-        #         print(f"Archivo eliminado: {download_path}")
-        #     except Exception as remove_error:
-        #         print(f"Error al eliminar el archivo: {remove_error}")
-        #     return response
-        
+    try:        
         print("El archivo a descargar es:", download_path)
         return send_file(download_path, as_attachment=True)
     except Exception as e:
         print(f"Error: {e}")
         abort(500, description="Internal server error")
+
+@app.route('/delete-file', methods=['POST'])
+def delete_file():
+    file_path = request.args.get('path')
+
+    if not file_path or not os.path.exists(file_path):
+        return "File not found", 404
+
+    try:
+        os.remove(file_path)
+        return "File deleted successfully", 200
+    except Exception as e:
+        print(f"Error deleting file: {e}")
+        return "Error deleting file", 500
+
 
 @app.route('/submit', methods=['POST'])
 def submit():

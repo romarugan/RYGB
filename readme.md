@@ -1,4 +1,4 @@
-# RGYB Application 
+# RYGB Sucess Estimator (RYSUES) 
 
 ## Docker
 <p align="center">

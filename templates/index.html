@@ -192,14 +192,14 @@
                         <input class="form-check-input" type="radio" name="file" id="file1" value="test_data_1_2.csv">
                         <label class="form-check-label" for="file1">
                             <img id="filec" src="{{ url_for('static',filename='/images/csv.png')}}" class="card-img-top"
-                            alt="...">
-                            <strong><span class="subrayado">test_data_1_2.csv </span></strong> for model 1 y 2 
+                                alt="...">
+                            <strong><span class="subrayado">test_data_1_2.csv </span></strong> for model 1 y 2
                         </label>
                         <input class="form-check-input" type="radio" name="file" id="file2" value="test_data_3.csv">
                         <label class="form-check-label" for="file2">
-                            <img id="filec2" src="{{ url_for('static',filename='/images/csv.png')}}" class="card-img-top"
-                            alt="...">
-                            <strong><span class="subrayado">test_data_3.csv</span></strong> for model 3 
+                            <img id="filec2" src="{{ url_for('static',filename='/images/csv.png')}}"
+                                class="card-img-top" alt="...">
+                            <strong><span class="subrayado">test_data_3.csv</span></strong> for model 3
                         </label>
                     </div>
                     <button id="downloadButton">Download</button>
@@ -354,7 +354,7 @@
             }
         });
 
-        document.getElementById('downloadButton').addEventListener('click', function() {
+        document.getElementById('downloadButton').addEventListener('click', function () {
             // Obtén todos los elementos de radio
             const radios = document.getElementsByName('file');
 
@@ -431,9 +431,24 @@
                         document.getElementById("charged").innerText = data.message;
 
                         if (data.file_paths && Array.isArray(data.file_paths)) {
-                            // Redirige para iniciar la descarga de cada archivo
+                            // Iniciar la descarga de cada archivo
                             data.file_paths.forEach(filePath => {
-                                window.open(`http://127.0.0.1:5002/download?path=${encodeURIComponent(filePath)}`);
+                                const link = document.createElement('a');
+                                link.href = `http://127.0.0.1:5002/download?path=${encodeURIComponent(filePath)}`;
+                                link.download = '';
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+
+                                // Notificar al servidor para eliminar el archivo después de un retraso
+                                setTimeout(() => {
+                                    fetch(`/delete-file?path=${encodeURIComponent(filePath)}`, {
+                                        method: 'POST'
+                                    })
+                                        .then(response => response.text())
+                                        .then(data => console.log(data))
+                                        .catch(error => console.error('Error al eliminar el archivo:', error));
+                                }, 5000); // Ajustar el tiempo de espera según tus necesidades
                             });
                         }
                     })
@@ -442,7 +457,7 @@
                     });
             });
         });
-        
+
     </script>
 </body>
 
