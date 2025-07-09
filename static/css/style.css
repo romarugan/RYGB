@@ -3098,12 +3098,12 @@ body {
 }
 
 .encabezadol{
-  width : 250px !important;
+  width : 300px !important;
   height : 140px !important;
 }
 .encabezado2{
-  width : 360px !important;
-  height : 200px !important;
+  width : 600px !important;
+  height : 140px !important;
 }
 /* Estilos generales para el acordeón */
 .accordion {
