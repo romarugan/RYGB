@@ -217,7 +217,7 @@
                 </div>
             </div>
         </div>
-        <form method="POST" action="/submit">
+        <form id="submitf"  method="POST" action="/submit">
             <div class="row justify-content-center">
                 <div class="card col-lg-10 p-4 shadow">
                     <h4 class="mb-4"><strong>Single Patient</strong></h4>
@@ -314,7 +314,7 @@
                         </div>
 
                     </div>
-                    <button type="submit" class="btn btn-primary">Send</button>
+                    <button id="sendButton" type="submit" class="btn btn-primary">Send</button>
                     <p></p>
                     <p class="reference"><strong>1</strong> Fat mass: Total weight of fat tissue in the body.</p>
                     <p class="reference"><strong>2</strong> Waist circumference: Measurement around the abdomen, used to
@@ -456,6 +456,41 @@
                         document.getElementById("charged").innerText = "Error al enviar el formulario: " + error.message;
                     });
             });
+        });
+        document.getElementById('sendButton').addEventListener('click', function (event) {
+            event.preventDefault();
+
+            const form = document.getElementById('submitf');
+            const formData = new FormData(form);
+            fetch("/submit", {
+                method: "POST",
+                body: formData
+            })
+                .then(response => response.json()) // Obtener JSON de la respuesta
+                .then(data => {
+                    if (data.file_paths && Array.isArray(data.file_paths)) {
+                            // Iniciar la descarga de cada archivo
+                            data.file_paths.forEach(filePath => {
+                                const link = document.createElement('a');
+                                link.href = `http://127.0.0.1:5002/download?path=${encodeURIComponent(filePath)}`;
+                                link.download = '';
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+
+                                // Notificar al servidor para eliminar el archivo después de un retraso
+                                setTimeout(() => {
+                                    fetch(`/delete-file?path=${encodeURIComponent(filePath)}`, {
+                                        method: 'POST'
+                                    })
+                                        .then(response => response.text())
+                                        .then(data => console.log(data))
+                                        .catch(error => console.error('Error al eliminar el archivo:', error));
+                                }, 5000); // Ajustar el tiempo de espera según tus necesidades
+                            });
+                        }
+                })
+                .catch(error => console.error('Error:', error));
         });
 
     </script>

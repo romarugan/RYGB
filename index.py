@@ -155,10 +155,10 @@ def submit():
         #print(dft["variable"])
         with(ro.default_converter + pandas2ri.converter).context():
             dftc = ro.conversion.get_conversion().py2rpy(dft)
-            ro.assign('test_data',dftc)
+            ro.r.assign('test_data',dftc)
         with(ro.default_converter + pandas2ri.converter).context():
                             dfr = ro.conversion.get_conversion().py2rpy(df)
-                            ro.assign('dfr',dfr)
+                            ro.r.assign('dfr',dfr)
                             download_path =modelo_gb_bmi()
                             file_paths.append(download_path)
                             prediccionesx=1
